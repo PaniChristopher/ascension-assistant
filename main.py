@@ -40,24 +40,6 @@ def run_webhook_server():
     webhook_app.run(host="0.0.0.0", port=WEBHOOK_PORT)
 
 
-async def process_webhook_queue():
-    while True:
-        data = await webhook_queue.get()
-        channel = bot.get_channel(DISCORD_CHANNEL_ID)
-        if channel and data:
-            embed = discord.Embed(
-                title=data.get("title", "New Post"),
-                color=discord.Color.blue()
-            )
-            if "message" in data:
-                embed.add_field(name="Message", value=data["message"], inline=False)
-            if "link" in data:
-                embed.add_field(name="Link", value=data["link"], inline=False)
-            if "source" in data:
-                embed.set_footer(text=f"Posted on {data['source']}")
-            await channel.send(embed=embed)
-
-
 @tasks.loop(seconds=1)
 async def check_queue():
     while not webhook_queue.empty():
@@ -96,7 +78,16 @@ async def ping(ctx):
 
 @bot.command()
 async def webhook_url(ctx):
-    await ctx.send(f"POST to http://your-ip:8080/webhook")
+    await ctx.send(f"```\nGeneral webhook: http://YOUR_IP:{WEBHOOK_PORT}/webhook\n\nExample POST body:\n{{\n  \"title\": \"New Post\",\n  \"message\": \"Your message\",\n  \"link\": \"https://...\",\n  \"source\": \"Instagram\"\n}}\n```")
+    await channel.send(f"General webhook: http://YOUR_IP:{WEBHOOK_PORT}/webhook")
+    await channel.send(f"Example POST body:")
+    await channel.send("""{
+  "title": "New Post",
+  "message": "Your message",
+  "link": "https://...",
+  "source": "Instagram"
+}""")
+    await channel.send("```")
 
 
 if __name__ == "__main__":
