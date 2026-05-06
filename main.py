@@ -146,6 +146,7 @@ async def check_queue():
             data = await asyncio.wait_for(webhook_queue.get(), timeout=0.1)
             channel = bot.get_channel(DISCORD_CHANNEL_ID)
             if channel and data:
+                await channel.send(f"{MENTION_ROLE_ID}")
                 embed = discord.Embed(
                     title=data.get("title", "New Post"),
                     color=discord.Color.blue()
